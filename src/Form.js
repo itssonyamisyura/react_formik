@@ -1,25 +1,5 @@
 import { useFormik } from "formik";
-
-const validate = values => {
-    const errors = {};
-
-    if (!values.name) {
-        errors.name = 'Required field';
-    } else if (values.name.length < 2) {
-        errors.name = 'At least 2 characters'
-    }
-
-    if (!values.email) {
-        errors.email = 'Required field';
-    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
-        errors.email =  'Invalid email address';
-    }
-
-    return errors; // returns obj with errors(or an empty obj)
-}
-
-// handleChange is called each time we change our input
-// then validate() and inside this function => returns obj with errors(or an empty obj) --> using handleBlur(formik.touched)
+import * as Yup from 'yup'
 
 const Form = () => {
 
@@ -32,7 +12,23 @@ const Form = () => {
             text: '',
             terms: false
         },
-        validate,
+        validationSchema: Yup.object({
+            name: Yup.string()
+                    .min(2, 'At least 2 characters')
+                    .required('Required field'),
+            email: Yup.string()
+                    .email('Invalid email address')
+                    .required('Required field'),
+            amount: Yup.number()
+                    .min(5, 'At least 5')
+                    .required('Required field'),
+            currency: Yup.string().required('Select currency'),
+            text: Yup.string()
+                    .min(5, 'At least 5 characters'),
+            terms: Yup.boolean()
+                    .required('You have to accept the privacy policy')
+                    .oneOf([true], 'You have to accept the privacy policy')
+        }),
         onSubmit: values => console.log(JSON.stringify(values, null, 2))
     });
 
@@ -48,7 +44,7 @@ const Form = () => {
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
             />
-            {formik.errors.name && formik.touched.name ? <div>{formik.errors.name}</div> : null}
+            {formik.errors.name && formik.touched.name ? <div className="error">{formik.errors.name}</div> : null}
             <label htmlFor="email">Your email</label>
             <input
                 id="email"
@@ -58,7 +54,7 @@ const Form = () => {
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
             />
-            {formik.errors.email && formik.touched.email ? <div>{formik.errors.email}</div> : null}
+            {formik.errors.email && formik.touched.email ? <div className="error">{formik.errors.email}</div> : null}
             <label htmlFor="amount">Amount</label>
             <input
                 id="amount"
@@ -68,6 +64,7 @@ const Form = () => {
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
             />
+            {formik.errors.amount && formik.touched.amount ? <div className="error">{formik.errors.amount}</div> : null}
             <label htmlFor="currency">Currency</label>
             <select
                 id="currency"
@@ -80,6 +77,7 @@ const Form = () => {
                     <option value="CZK">CZK</option>
                     <option value="EUR">EUR</option>
             </select>
+            {formik.errors.currency && formik.touched.currency ? <div className="error">{formik.errors.currency}</div> : null}
             <label htmlFor="text">Your message</label>
             <textarea 
                 id="text"
@@ -88,6 +86,7 @@ const Form = () => {
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
             />
+            {formik.errors.text && formik.touched.text ? <div className="error">{formik.errors.text}</div> : null}
             <label className="checkbox">
                 <input 
                     name="terms" 
@@ -97,6 +96,7 @@ const Form = () => {
                     onBlur={formik.handleBlur} />
                 Do you agree with the privacy policy?
             </label>
+            {formik.errors.terms && formik.touched.terms ? <div className="error">{formik.errors.terms}</div> : null}
             <button type="submit">Submit</button>
         </form>
     )
